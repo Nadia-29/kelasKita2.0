@@ -38,12 +38,11 @@ class User extends Authenticatable
         return $this->hasMany(Transaksi::class, 'id_user');
     }
 
+    /*
     // Relasi ke Kelas yang sudah diambil (via Progress)
     public function enrolledClasses()
     {
-        // Menggunakan belongsToMany karena ini relasi Many-to-Many
-        return $this->belongsToMany(Kelas::class, 'progress_sub_materi', 'id_user', 'id_kelas')
-            ->withPivot('is_completed') // Opsional: untuk akses status progress
-            ->distinct();
-    }
+        return $this->hasManyThrough(Kelas::class, ProgressSubMateri::class, 'id_user', 'id_kelas', 'id_user', 'id_kelas')->distinct();
+    } 
+    */
 }
