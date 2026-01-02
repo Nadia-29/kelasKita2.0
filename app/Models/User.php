@@ -63,6 +63,16 @@ class User extends Authenticatable
         return $this->hasOne(Mentor::class, 'id_user');
     }
 
+    public function socialAccounts()
+    {
+        return $this->hasMany(SocialAccount::class, 'id_user');
+    }
+
+    public function adminNote()
+    {
+        return $this->morphOne(AdminNote::class, 'notable');
+    }
+
     // Relasi ke Transaksi
     public function transaksis()
     {

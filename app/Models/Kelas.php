@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Kelas extends Model
 {
     use HasFactory;
 
     protected $table = 'kelas';
+
     protected $primaryKey = 'id_kelas';
 
     protected $fillable = [
@@ -21,7 +22,6 @@ class Kelas extends Model
         'thumbnail',
         'description',
         'status_publikasi',
-        'catatan_admin'
     ];
 
     public function mentor()
@@ -37,5 +37,15 @@ class Kelas extends Model
     public function reviews()
     {
         return $this->hasMany(Review::class, 'id_kelas');
+    }
+
+    public function transaksiDetails()
+    {
+        return $this->hasMany(TransaksiDetail::class, 'id_kelas');
+    }
+
+    public function adminNote()
+    {
+        return $this->morphOne(AdminNote::class, 'notable');
     }
 }
