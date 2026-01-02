@@ -36,6 +36,6 @@ class ReportController extends Controller
 
         $report = $query->get();
 
-        return view('admin.pages.kelola-report', compact('report', 'kategoriUnik', 'statusUnik'));
+        return view('admin.pages.kelola-report.index', compact('report', 'kategoriUnik', 'statusUnik'));
     }
 }

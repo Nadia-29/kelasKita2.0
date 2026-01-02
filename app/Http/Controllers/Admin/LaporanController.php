@@ -53,6 +53,6 @@ class LaporanController extends Controller
             ->pluck('nama_metode');
         $statusUnik = Transaksi::select('status')->distinct()->pluck('status');
 
-        return view('admin.pages.kelola-laporan', compact('transaksi', 'metodePembayaranUnik', 'statusUnik'));
+        return view('admin.pages.kelola-laporan.index', compact('transaksi', 'metodePembayaranUnik', 'statusUnik'));
     }
 }

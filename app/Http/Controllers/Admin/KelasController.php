@@ -44,6 +44,6 @@ class KelasController extends Controller
         // Ambil daftar status unik
         $statusUnik = Kelas::select('status_publikasi')->distinct()->pluck('status_publikasi');
 
-        return view('admin.pages.kelola-kelas', compact('kelas', 'kategoriUnik', 'statusUnik'));
+        return view('admin.pages.kelola-kelas.index', compact('kelas', 'kategoriUnik', 'statusUnik'));
     }
 }

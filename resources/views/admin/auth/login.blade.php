@@ -170,13 +170,13 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center">
+                    <!-- <div class="flex items-center">
                         <input id="remember-me" name="remember-me" type="checkbox"
                             class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600 cursor-pointer">
                         <label for="remember-me"
                             class="ml-2 block text-sm text-slate-600 cursor-pointer select-none">Keep me logged
                             in</label>
-                    </div>
+                    </div> -->
 
                     <div>
                         <button type="submit"

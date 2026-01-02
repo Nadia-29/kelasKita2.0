@@ -95,7 +95,7 @@
                                 <dl>
                                     <dt class="truncate text-sm font-medium text-slate-500">Pendapatan</dt>
                                     <dd>
-                                        <div class="text-lg font-bold text-slate-900">Rp
+                                        <div class="text-medium font-bold text-slate-900">Rp
                                             {{ number_format($totalPendapatan, 0, ',', '.') }}</div>
                                     </dd>
                                 </dl>
