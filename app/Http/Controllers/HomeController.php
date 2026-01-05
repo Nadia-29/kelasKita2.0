@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Home;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Api\Home\HomeApiController;
@@ -10,7 +10,7 @@ class HomeController extends Controller
 {
     public function index()
     {
-        // Panggil controller API langsung (internal call)
+        
         $apiController = new HomeApiController();
         
         $kelasResponse = $apiController->getKelas();
@@ -22,5 +22,6 @@ class HomeController extends Controller
         $mentors = $mentorsResponse->getData()->data ?? [];
         $reviews = $reviewsResponse->getData()->data ?? [];
 
+        return view('home', compact('kelas', 'mentors', 'reviews'));
     }
 }

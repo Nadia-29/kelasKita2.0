@@ -15,8 +15,9 @@ class TransaksiApiController extends Controller
     {
         $userId = $request->query('user_id');
 
+        // Pastikan kolom 'status_pembayaran' benar (atau ganti 'status' jika di DB namanya status)
         $transaksi = Transaksi::where('id_user', $userId)
-            ->select('id_transaksi', 'id_user', 'total_harga', 'status_pembayaran', 'created_at')
+            ->select('id_transaksi', 'id_user', 'total_harga', 'status_pembayaran', 'created_at') 
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -71,13 +72,18 @@ class TransaksiApiController extends Controller
             return $item->kelas->harga ?? 0;
         });
 
+        // --- PERBAIKAN: Generate Kode Invoice ---
+        // Contoh Output: INV-20260106-5923
+        $kodeInvoice = 'INV-' . date('Ymd') . '-' . mt_rand(1000, 9999);
+
         DB::beginTransaction();
         try {
             // Buat transaksi
             $transaksi = Transaksi::create([
                 'id_user' => $userId,
+                'kode_invoice' => $kodeInvoice, // <--- WAJIB DITAMBAHKAN
                 'total_harga' => $totalHarga,
-                'status_pembayaran' => 'pending'
+                'status_pembayaran' => 'pending' // Pastikan nama kolom di DB 'status_pembayaran' atau 'status'
             ]);
 
             // Buat transaksi detail

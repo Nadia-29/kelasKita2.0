@@ -12,8 +12,10 @@ class HomeApiController extends Controller
 {
     public function getKelas()
     {
-        $kelas = Kelas::with('mentor.user') // Ambil mentor beserta user-nya
-            ->latest()
+        $kelas = Kelas::with('mentor.user:id_user,first_name,last_name,foto_profil')
+            ->select('id_kelas', 'id_mentor', 'nama_kelas', 'description', 'harga', 'thumbnail', 'kategori', 'status_publikasi', 'created_at')
+            ->where('status_publikasi', 'published')
+            ->orderBy('created_at', 'desc')
             ->take(6)
             ->get();
 
@@ -25,9 +27,9 @@ class HomeApiController extends Controller
 
     public function getMentors()
     {
-        //  Sesuaikan dengan kolom yang ada di tabel users
-        $mentors = Mentor::with('user:id_user,first_name,last_name,foto_profil') 
-            ->select('id_mentor', 'id_user', 'keahlian', 'deskripsi_mentor')
+        $mentors = Mentor::with('user:id_user,first_name,last_name,foto_profil')
+            ->where('status', 'active')
+            ->select('id_mentor', 'id_user', 'keahlian', 'deskripsi_mentor', 'status')
             ->get();
 
         return response()->json([
@@ -38,9 +40,8 @@ class HomeApiController extends Controller
 
     public function getReviews()
     {
-        // suaikan dengan kolom yang ada
         $reviews = Review::with([
-                'user:id_user,first_name,last_name,foto_profil',  // Kolom yang benar
+                'user:id_user,first_name,last_name',
                 'kelas:id_kelas,nama_kelas'
             ])
             ->where('bintang', '>=', 4)

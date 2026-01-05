@@ -1,18 +1,18 @@
     <?php
 
         use Illuminate\Http\Request;
-        use App\Http\Controllers\Api\Home\HomeApiController;
+        use App\Http\Controllers\Api\HomeApiController;
         use App\Http\Controllers\Api\Detailkelas\KelasApiController;
         use App\Http\Controllers\Api\Keranjang\KeranjangApiController;
         use App\Http\Controllers\Api\Transaksi\TransaksiApiController;
         use Illuminate\Support\Facades\Route;
 
         // Home API
-        Route::prefix('home')->group(function () {  
+        Route::get('/home', [HomeApiController::class, 'index']);
         Route::get('/kelas', [HomeApiController::class, 'getKelas']);
         Route::get('/mentors', [HomeApiController::class, 'getMentors']);
         Route::get('/reviews', [HomeApiController::class, 'getReviews']);
-        });
+        
         // Kelas API
         Route::prefix('kelas')->group(function () {
             Route::get('/{id}', [KelasApiController::class, 'show']);
@@ -28,9 +28,11 @@
 
         // Transaksi API
         Route::prefix('transaksi')->group(function () {
-            Route::get('/', [TransaksiApiController::class, 'index']);
+            Route::get('/transaksi', [TransaksiApiController::class, 'index']);
             Route::post('/checkout', [TransaksiApiController::class, 'store']);
             Route::get('/{id}', [TransaksiApiController::class, 'show']);
+            Route::get('/transaksi/{id}', [TransaksiApiController::class, 'show']);
+            Route::get('/transaksi/{id}', [TransaksiApiController::class, 'show']);
         });
 
 

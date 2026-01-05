@@ -40,7 +40,6 @@
                         <p>{{ Str::limit($k->deskripsi ?? '', 100) }}</p>
                         <p><small>Kategori: {{ $k->kategori }}</small></p>
                         @if(isset($k->mentor->user))
-                            {{-- ✅ Gabungkan first_name dan last_name --}}
                             <p><small>Mentor: {{ $k->mentor->user->first_name }} {{ $k->mentor->user->last_name }}</small></p>
                         @endif
                         <div class="price">Rp {{ number_format($k->harga, 0, ',', '.') }}</div>
@@ -57,13 +56,11 @@
             <div class="mentor-list">
                 @forelse($mentors as $mentor)
                     <div class="mentor-card">
-                        {{-- ✅ Ganti profile_picture menjadi foto_profil --}}
                         @if(isset($mentor->user->foto_profil) && !empty($mentor->user->foto_profil))
                             <img src="{{ asset('storage/' . $mentor->user->foto_profil) }}" alt="Mentor">
                         @else
                             <img src="https://via.placeholder.com/80?text=Mentor" alt="Mentor">
                         @endif
-                        {{-- ✅ Gabungkan first_name dan last_name --}}
                         <h4>{{ $mentor->user->first_name ?? '' }} {{ $mentor->user->last_name ?? '' }}</h4>
                         <p>{{ $mentor->keahlian }}</p>
                     </div>
@@ -78,7 +75,6 @@
             <div class="review-list">
                 @forelse($reviews as $review)
                     <div class="review-card">
-                        {{-- ✅ Gabungkan first_name dan last_name --}}
                         <h4>{{ $review->user->first_name ?? 'Anonymous' }} {{ $review->user->last_name ?? '' }}</h4>
                         <div class="rating">
                             @for($i = 0; $i < $review->bintang; $i++)
