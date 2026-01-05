@@ -1,126 +1,103 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Keranjang Belanja</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; color: #333; }
-        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
-        
-        /* Tombol Kembali */
-        .back-link { display: inline-flex; align-items: center; margin-bottom: 20px; color: #4b5563; text-decoration: none; font-weight: 600; transition: color 0.2s; }
-        .back-link:hover { color: #2563eb; }
-        
-        h1 { font-size: 28px; font-weight: 800; color: #111827; margin-bottom: 24px; }
-        
-        /* Alert Styles */
-        .alert { padding: 16px; border-radius: 8px; margin-bottom: 24px; font-weight: 500; }
-        .alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-        .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-        
-        /* Wrapper Keranjang */
-        .keranjang-wrapper { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); overflow: hidden; }
-        
-        /* Item Keranjang */
-        .keranjang-item { display: flex; gap: 24px; padding: 24px; border-bottom: 1px solid #f3f4f6; align-items: center; transition: background 0.2s; }
-        .keranjang-item:hover { background: #fafafa; }
-        .keranjang-item:last-child { border-bottom: none; }
-        
-        .keranjang-item img { width: 120px; height: 80px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        
-        .item-info { flex: 1; }
-        .item-info h3 { font-size: 18px; font-weight: 700; color: #1f2937; margin-bottom: 6px; }
-        .item-info .date { font-size: 14px; color: #6b7280; margin-bottom: 12px; }
-        .item-info .price { font-size: 18px; font-weight: 700; color: #2563eb; }
-        
-        /* Tombol Hapus */
-        .btn-hapus { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; background: #fee2e2; color: #dc2626; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; }
-        .btn-hapus:hover { background: #dc2626; color: white; }
-        
-        /* Empty State */
-        .empty-cart { text-align: center; padding: 80px 20px; }
-        .empty-cart h2 { font-size: 24px; color: #374151; margin-bottom: 12px; }
-        .empty-cart p { color: #6b7280; margin-bottom: 24px; }
-        .btn-shop { display: inline-block; padding: 12px 24px; background: #2563eb; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; transition: background 0.2s; }
-        .btn-shop:hover { background: #1d4ed8; }
-        
-        /* Summary Section */
-        .summary { background: #f9fafb; padding: 24px; border-top: 1px solid #e5e7eb; }
-        .summary-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 16px; color: #4b5563; }
-        .summary-row.total { margin-top: 20px; padding-top: 20px; border-top: 1px dashed #d1d5db; font-size: 20px; font-weight: 800; color: #111827; }
-        
-        .btn-checkout { display: block; width: 100%; padding: 16px; background: #10b981; color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: 700; cursor: pointer; transition: background 0.2s; margin-top: 24px; }
-        .btn-checkout:hover { background: #059669; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <a href="{{ url('/') }}" class="back-link">← Kembali ke Homepage</a>
+@extends('layouts.app')
 
-        <h1>🛒 Keranjang Belanja</h1>
+@section('title', 'Keranjang Belanja - KelasKu')
 
-        @if(session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
+@section('content')
+<section class="bg-primary py-12 relative overflow-hidden">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+        <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">Keranjang Belanja Anda</h1>
+        <p class="text-blue-100 text-lg">{{ count($keranjang) }} kursus siap untuk dipelajari.</p>
+    </div>
+</section>
 
-        @if(session('error'))
-            <div class="alert alert-error">{{ session('error') }}</div>
-        @endif
-
-        <div class="keranjang-wrapper">
-            @forelse($keranjang as $item)
-                <div class="keranjang-item">
-                    @if(!empty($item->kelas->thumbnail))
-                        <img src="{{ asset('storage/' . $item->kelas->thumbnail) }}" alt="{{ $item->kelas->nama_kelas }}">
-                    @else
-                        <img src="https://via.placeholder.com/150x100?text=No+Image" alt="No Image">
-                    @endif
-
-                    
-
-                    <div class="item-info">
-                        <h3>{{ $item->kelas->nama_kelas ?? 'Kelas tidak ditemukan' }}</h3>
-                        <p class="date">Ditambahkan: {{ $item->created_at->format('d M Y') }}</p>
-                        <div class="price">Rp {{ number_format($item->kelas->harga ?? 0, 0, ',', '.') }}</div>
+<section class="py-16 container mx-auto px-4 sm:px-6 lg:px-8">
+    @if(count($keranjang) > 0)
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        
+        <div class="lg:col-span-2 space-y-6">
+            @foreach($keranjang as $item)
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col sm:flex-row items-start sm:items-center transition hover:shadow-md">
+                <a href="{{ route('kelas.detail', $item['kelas']['id_kelas']) }}" class="w-full sm:w-48 h-32 flex-shrink-0 mb-4 sm:mb-0 sm:mr-6 relative rounded-xl overflow-hidden group">
+                    <img src="{{ $item['kelas']['thumbnail'] ? asset('storage/'.$item['kelas']['thumbnail']) : 'https://via.placeholder.com/200x150' }}" alt="{{ $item['kelas']['nama_kelas'] }}" class="w-full h-full object-cover group-hover:scale-105 transition">
+                </a>
+                
+                <div class="flex-grow">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2 leading-snug hover:text-primary transition">
+                        <a href="{{ route('kelas.detail', $item['kelas']['id_kelas']) }}">
+                            {{ $item['kelas']['nama_kelas'] }}
+                        </a>
+                    </h3>
+                    <p class="text-sm text-gray-500 mb-3 flex items-center">
+                        <i class="far fa-user-circle mr-2"></i> Oleh {{ $item['kelas']['mentor']['name'] ?? 'Instruktur' }}
+                    </p>
+                    <div class="flex items-center text-yellow-400 text-sm mb-4 sm:mb-0">
+                        <span class="font-bold text-gray-700 mr-2">4.8</span>
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                        <span class="text-gray-400 ml-2">(210)</span>
                     </div>
+                </div>
 
-                    <form action="{{ route('keranjang.hapus', $item->id_keranjang) }}" method="POST" onsubmit="return confirm('Hapus kelas ini dari keranjang?')">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn-hapus">
-                            🗑️ Hapus
+                <div class="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center w-full sm:w-auto mt-4 sm:mt-0 sm:ml-6">
+                    <div class="text-right mb-0 sm:mb-4">
+                        <div class="text-2xl font-bold text-primary">Rp {{ number_format($item['kelas']['harga'], 0, ',', '.') }}</div>
+                         <div class="text-sm text-gray-400 line-through font-medium">Rp {{ number_format($item['kelas']['harga'] * 1.3, 0, ',', '.') }}</div>
+                    </div>
+                    <form action="{{ route('keranjang.hapus', $item['id_keranjang']) }}" method="POST">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="text-red-500 hover:text-red-700 text-sm font-semibold flex items-center transition bg-red-50 px-3 py-2 rounded-lg hover:bg-red-100">
+                            <i class="far fa-trash-alt mr-2"></i> Hapus
                         </button>
                     </form>
                 </div>
-            @empty
-                <div class="empty-cart">
-                    <h2>Keranjang Anda Kosong</h2>
-                    <p>Sepertinya Anda belum memilih kelas apapun untuk dipelajari.</p>
-                    <a href="{{ url('/') }}" class="btn-shop">Mulai Jelajahi Kelas</a>
-                </div>
-            @endforelse
+            </div>
+            @endforeach
+        </div>
 
-            @if($keranjang->count() > 0)
-                <div class="summary">
-                    <div class="summary-row">
-                        <span>Jumlah Item</span>
-                        <span>{{ $keranjang->count() }} Kelas</span>
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 sticky top-28">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Ringkasan Pesanan</h2>
+                
+                <div class="space-y-4 mb-8">
+                    <div class="flex justify-between text-gray-600 text-lg">
+                        <span>Subtotal ({{ count($keranjang) }} kursus)</span>
+                        <span class="font-medium">Rp {{ number_format($total, 0, ',', '.') }}</span>
                     </div>
-                    
-                    <div class="summary-row total">
-                        <span>Total Pembayaran</span>
-                        <span>Rp {{ number_format($total, 0, ',', '.') }}</span>
+                    <div class="flex justify-between text-gray-600 text-lg">
+                        <span>Diskon</span>
+                        <span class="font-medium text-green-600">-Rp 0</span>
                     </div>
-
-                    <form action="{{ route('transaksi.checkout') }}" method="POST">
-                        @csrf
-                        <button type="submit" class="btn-checkout">Bayar Sekarang 👉</button>
-                    </form>
+                    <div class="border-t border-gray-100 my-4 pt-4 flex justify-between items-center">
+                        <span class="text-xl font-bold text-gray-800">Total Pembayaran</span>
+                        <span class="text-3xl font-bold text-primary">Rp {{ number_format($total, 0, ',', '.') }}</span>
+                    </div>
                 </div>
-            @endif
+
+                <form action="{{ route('checkout.process') }}" method="POST">
+                    @csrf
+                    <button class="btn-primary w-full py-5 rounded-xl font-bold text-xl shadow-md hover:shadow-lg transition flex items-center justify-center mb-4">
+                        Checkout Sekarang <i class="fas fa-arrow-right ml-3"></i>
+                    </button>
+                </form>
+
+                <div class="mt-6 pt-6 border-t border-gray-100">
+                    <label class="block text-sm font-bold text-gray-700 mb-3">Kode Kupon</label>
+                    <div class="flex">
+                        <input type="text" placeholder="Masukkan kode" class="flex-grow border border-gray-300 rounded-l-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-50">
+                        <button class="bg-gray-800 text-white px-6 rounded-r-xl font-bold hover:bg-gray-900 transition">Terapkan</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</body>
-</html>
+    @else
+    <div class="text-center py-20 bg-white rounded-3xl shadow-sm border border-gray-100 max-w-3xl mx-auto">
+        <img src="https://cdn-icons-png.flaticon.com/512/11329/11329116.png" alt="Keranjang Kosong" class="w-48 mx-auto mb-8 opacity-80">
+        <h2 class="text-3xl font-bold text-gray-800 mb-4">Keranjang Anda Masih Kosong</h2>
+        <p class="text-gray-500 text-lg mb-10 max-w-md mx-auto">Sepertinya Anda belum menambahkan kursus apapun. Yuk, mulai cari skill baru untuk dipelajari!</p>
+        <a href="{{ route('home') }}" class="btn-primary px-10 py-4 rounded-full font-bold text-lg shadow-md hover:shadow-lg transition inline-flex items-center">
+            <i class="fas fa-search mr-3"></i> Jelajahi Kursus
+        </a>
+    </div>
+    @endif
+</section>
+@endsection

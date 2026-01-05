@@ -1,95 +1,103 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Homepage - Platform Kursus</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: #f5f5f5; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        h1, h2 { color: #333; margin-bottom: 20px; }
-        .kelas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-bottom: 40px; }
-        .kelas-card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .kelas-card img { width: 100%; height: 200px; object-fit: cover; border-radius: 4px; margin-bottom: 10px; }
-        .kelas-card h3 { color: #2563eb; margin-bottom: 10px; }
-        .kelas-card .price { font-size: 18px; font-weight: bold; color: #059669; margin-top: 10px; }
-        .mentor-list, .review-list { display: flex; gap: 20px; overflow-x: auto; margin-bottom: 40px; }
-        .mentor-card, .review-card { background: white; border-radius: 8px; padding: 15px; min-width: 250px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .mentor-card img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; }
-        .review-card .rating { color: #f59e0b; font-size: 18px; margin-bottom: 5px; }
-        .btn { display: inline-block; padding: 10px 20px; background: #2563eb; color: white; text-decoration: none; border-radius: 4px; margin-top: 10px; }
-        .btn:hover { background: #1d4ed8; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Selamat Datang di Platform Kursus</h1>
+@extends('layouts.app')
 
-        <section>
-            <h2>Daftar Kelas</h2>
-            <div class="kelas-grid">
-                 @forelse($kelas as $k)
-                    <div class="kelas-card">
-                        @if(!empty($k->thumbnail))
-                            <img src="{{ asset('storage/' . $k->thumbnail) }}" alt="{{ $k->nama_kelas }}">
-                        @else
-                            <img src="https://via.placeholder.com/300x200?text=No+Image" alt="No Image">
-                        @endif
-                        <h3>{{ $k->nama_kelas }}</h3>
-                        <p>{{ Str::limit($k->deskripsi ?? '', 100) }}</p>
-                        <p><small>Kategori: {{ $k->kategori }}</small></p>
-                        @if(isset($k->mentor->user))
-                            <p><small>Mentor: {{ $k->mentor->user->first_name }} {{ $k->mentor->user->last_name }}</small></p>
-                        @endif
-                        <div class="price">Rp {{ number_format($k->harga, 0, ',', '.') }}</div>
-                        <a href="{{ route('kelas.detail', $k->id_kelas) }}" class="btn">Lihat Detail</a>
-                    </div>
-                @empty
-                    <p>Belum ada kelas tersedia.</p>
-                @endforelse
-            </div>
-        </section>
+@section('title', 'Beranda - KelasKu')
 
-        <section>
-            <h2>Mentor Kami</h2>
-            <div class="mentor-list">
-                @forelse($mentors as $mentor)
-                    <div class="mentor-card">
-                        @if(isset($mentor->user->foto_profil) && !empty($mentor->user->foto_profil))
-                            <img src="{{ asset('storage/' . $mentor->user->foto_profil) }}" alt="Mentor">
-                        @else
-                            <img src="https://via.placeholder.com/80?text=Mentor" alt="Mentor">
-                        @endif
-                        <h4>{{ $mentor->user->first_name ?? '' }} {{ $mentor->user->last_name ?? '' }}</h4>
-                        <p>{{ $mentor->keahlian }}</p>
-                    </div>
-                @empty
-                    <p>Belum ada mentor tersedia.</p>
-                @endforelse
-            </div>
-        </section>
-
-        <section>
-            <h2>Review dari Pengguna</h2>
-            <div class="review-list">
-                @forelse($reviews as $review)
-                    <div class="review-card">
-                        <h4>{{ $review->user->first_name ?? 'Anonymous' }} {{ $review->user->last_name ?? '' }}</h4>
-                        <div class="rating">
-                            @for($i = 0; $i < $review->bintang; $i++)
-                                ★
-                            @endfor
-                        </div>
-                        <p>{{ Str::limit($review->isi_review, 80) }}</p>
-                        <small>Kelas: {{ $review->kelas->nama_kelas ?? '' }}</small><br>
-                        <small>{{ date('d M Y', strtotime($review->created_at)) }}</small>
-                    </div>
-                @empty
-                    <p>Belum ada review.</p>
-                @endforelse
-            </div>
-        </section>
+@section('content')
+<section class="bg-primary py-20 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+        <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">Jelajahi Kursus Terbaik</h1>
+        <nav class="flex justify-center text-blue-100 text-sm font-medium space-x-2">
+            <span>Beranda</span>
+            <span>/</span>
+            <span class="text-white">Semua Kursus</span>
+        </nav>
     </div>
-</body>
-</html>
+</section>
+
+<section class="py-16 container mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-col md:flex-row justify-between items-center mb-10">
+        <h2 class="text-3xl font-bold text-gray-800 mb-4 md:mb-0">Semua Kursus Tersedia</h2>
+        <div class="flex flex-wrap justify-center gap-3">
+            <button class="btn-primary px-5 py-2 rounded-full text-sm font-semibold shadow-sm transition">Semua</button>
+            <button class="bg-white text-gray-600 hover:bg-gray-100 px-5 py-2 rounded-full text-sm font-semibold shadow-sm border border-gray-200 transition">Web Design</button>
+            <button class="bg-white text-gray-600 hover:bg-gray-100 px-5 py-2 rounded-full text-sm font-semibold shadow-sm border border-gray-200 transition">Development</button>
+            <button class="bg-white text-gray-600 hover:bg-gray-100 px-5 py-2 rounded-full text-sm font-semibold shadow-sm border border-gray-200 transition">Marketing</button>
+        </div>
+    </div>
+
+    @if(isset($data['kelas']) && count($data['kelas']) > 0)
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        @foreach($data['kelas'] as $item)
+        <div class="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 group border border-gray-100 flex flex-col h-full">
+            <div class="relative">
+                <img src="{{ $item['thumbnail'] ? asset('storage/'.$item['thumbnail']) : 'https://via.placeholder.com/400x250?text=KelasKu' }}" alt="{{ $item['nama_kelas'] }}" class="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-500">
+                <div class="absolute top-4 right-4 bg-white text-primary font-bold px-4 py-1.5 rounded-full shadow-md text-sm">
+                    Rp {{ number_format($item['harga'], 0, ',', '.') }}
+                </div>
+            </div>
+
+            <div class="p-6 flex-1 flex flex-col">
+                <div class="flex items-center justify-between mb-3 text-sm">
+                    <div class="flex items-center space-x-2 text-gray-600 font-medium">
+                        <img src="https://ui-avatars.com/api/?name={{ urlencode($item['mentor']['name'] ?? 'M') }}&background=random" class="w-8 h-8 rounded-full border-2 border-white shadow-sm">
+                        <span>{{ $item['mentor']['name'] ?? 'Mentor' }}</span>
+                    </div>
+                    <span class="text-gray-400 text-xs"><i class="far fa-calendar-alt mr-1"></i> {{ date('d M Y', strtotime($item['created_at'])) }}</span>
+                </div>
+
+                <h3 class="text-xl font-bold text-gray-800 mb-3 leading-snug line-clamp-2 hover:text-primary transition">
+                    <a href="{{ route('kelas.detail', $item['id_kelas']) }}">
+                        {{ $item['nama_kelas'] }}
+                    </a>
+                </h3>
+
+                <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+                    <span class="flex items-center"><i class="far fa-clock mr-2 text-primary"></i> 15 Jam</span>
+                    <span class="flex items-center"><i class="far fa-play-circle mr-2 text-primary"></i> 24 Materi</span>
+                </div>
+
+                <div class="mt-auto flex items-center justify-between pt-4 border-t border-gray-100">
+                    <a href="{{ route('kelas.detail', $item['id_kelas']) }}" class="text-primary font-semibold text-sm hover:underline transition">
+                        Lihat Detail <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                    <div class="text-yellow-400 text-sm">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                        <span class="text-gray-600 ml-1 font-semibold">(4.8)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endforeach
+    </div>
+    @else
+    <div class="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
+        <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" alt="Kosong" class="w-32 mx-auto mb-4 opacity-50">
+        <h3 class="text-xl font-bold text-gray-700 mb-2">Belum Ada Kursus</h3>
+        <p class="text-gray-500">Saat ini belum ada kursus yang tersedia untuk ditampilkan.</p>
+    </div>
+    @endif
+</section>
+
+<section class="container mx-auto px-4 sm:px-6 lg:px-8 mb-16">
+    <div class="bg-primary rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between relative overflow-hidden shadow-xl">
+         <div class="absolute -top-24 -left-24 w-64 h-64 bg-white opacity-10 rounded-full"></div>
+         <div class="absolute -bottom-24 -right-24 w-64 h-64 bg-white opacity-10 rounded-full"></div>
+
+        <div class="text-white md:w-1/2 mb-8 md:mb-0 relative z-10">
+            <h2 class="text-3xl font-bold mb-4">Berlangganan Newsletter Kami</h2>
+            <p class="text-blue-100 text-lg">Dapatkan info terbaru tentang kursus, promo spesial, dan tips belajar langsung ke inbox Anda.</p>
+        </div>
+        <div class="md:w-5/12 relative z-10">
+            <form class="flex shadow-lg rounded-full overflow-hidden">
+                <input type="email" placeholder="Masukkan email Anda..." class="flex-grow px-6 py-4 focus:outline-none text-gray-700">
+                <button type="button" class="bg-gray-900 text-white px-8 py-4 font-bold hover:bg-gray-800 transition">Langganan</button>
+            </form>
+        </div>
+    </div>
+</section>
+@endsection
