@@ -12,65 +12,62 @@ class TransaksiController extends Controller
 {
     public function process(Request $request)
     {
+        // 1. CEK USER
         $user = Auth::user();
-        
         if (!$user) {
-            if ($request->wantsJson() || $request->is('api/*')) {
-                return response()->json(['status' => 'error', 'message' => 'Unauthorized. Silakan login.'], 401);
-            }
-            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
+            dd("Error: User belum login / Sesi habis."); // DEBUG 1
         }
 
-        // 2. AMBIL DATA KERANJANG (Logika Web vs API)
+        // 2. AMBIL DATA KERANJANG
         $cart = [];
-
         if ($request->wantsJson() || $request->is('api/*')) {
-            // [API] Ambil dari JSON Body (Raw Data)
-            // Format JSON harus: { "items": [ { "id_kelas": 1, "harga": 125000 } ] }
             $cart = $request->input('items'); 
         } else {
-            
             $cart = session('cart');
         }
 
+        // DEBUG 2: Cek isi keranjang
         if (!$cart || count($cart) <= 0) {
-            $pesan = 'Keranjang Anda kosong!';
-            if ($request->wantsJson() || $request->is('api/*')) {
-                return response()->json(['status' => 'error', 'message' => $pesan], 400);
-            }
-            return redirect()->route('cart.index')->with('error', $pesan);
+            dd("Error: Keranjang Kosong / Tidak Terbaca.", session()->all());
         }
 
-        // 3. Hitung Total Harga
+        // 3. HITUNG TOTAL
         $totalHarga = 0;
         foreach ($cart as $item) {
-            // Support format array maupun object (jika dari API kadang bentuknya array)
             $harga = is_array($item) ? $item['harga'] : $item->harga; 
             $totalHarga += $harga;
         }
 
-        // 4. MULAI TRANSAKSI DATABASE
-        DB::beginTransaction();
-        try {
-            // A. Insert ke Tabel 'transaksi'
-            $idTransaksi = DB::table('transaksi')->insertGetId([
-                'id_user'       => $user->id_user ?? $user->id,
+        // 4. INSERT DATABASE (TANPA TRY-CATCH AGAR ERROR KELIHATAN)
+        // Kita gunakan DB::transaction agar aman
+        $idTransaksi = DB::transaction(function () use ($user, $totalHarga, $cart) {
+            
+            // A. Insert Transaksi
+            // Perhatikan: Pastikan kolom 'id_user' di tabel users Anda benar-benar 'id_user' atau 'id'
+            $userId = $user->id_user ?? $user->id;
+
+            if(!$userId) {
+                dd("Error: ID User tidak ditemukan. Cek Model User & Primary Key.");
+            }
+
+            $idTrans = DB::table('transaksi')->insertGetId([
+                'id_user'       => $userId,
                 'kode_invoice'  => 'INV-' . strtoupper(uniqid()),
                 'total_harga'   => $totalHarga,
                 'status'        => 'pending',
+                'id_mp'         => null, // Kita set null dulu sesuai struktur tabel Anda
                 'tgl_transaksi' => now(),
                 'created_at'    => now(),
                 'updated_at'    => now()
             ]);
 
-            // B. Insert ke Tabel 'detail_transaksi'
+            // B. Insert Detail
             foreach ($cart as $item) {
-                // Pastikan akses key array aman untuk API & Session
                 $idKelas = is_array($item) ? $item['id_kelas'] : $item->id_kelas;
                 $harga   = is_array($item) ? $item['harga'] : $item->harga;
 
-                DB::table('detail_transaksi')->insert([
-                    'id_transaksi'    => $idTransaksi,
+                DB::table('transaksi_detail')->insert([
+                    'id_transaksi'    => $idTrans,
                     'id_kelas'        => $idKelas,
                     'harga_saat_beli' => $harga,
                     'created_at'      => now(),
@@ -78,38 +75,30 @@ class TransaksiController extends Controller
                 ]);
             }
 
-            // Commit
-            DB::commit();
+            return $idTrans;
+        });
 
-            // 5. Hapus Session Cart (Khusus Web)
-            if (!($request->wantsJson() || $request->is('api/*'))) {
-                session()->forget('cart');
-            }
-
-            // --- RESPONSE API ---
-            if ($request->wantsJson() || $request->is('api/*')) {
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Transaksi berhasil dibuat',
-                    'data' => [
-                        'id_transaksi' => $idTransaksi,
-                        'total_harga' => $totalHarga,
-                        'invoice' => 'INV-' . time() // Dummy invoice code preview
-                    ]
-                ], 201);
-            }
-
-            // --- RESPONSE WEB ---
-            return redirect()->route('transaksi.show', $idTransaksi)->with('success', 'Pesanan berhasil dibuat!');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            
-            if ($request->wantsJson() || $request->is('api/*')) {
-                return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
-            }
-            return redirect()->back()->with('error', 'Gagal memproses transaksi: ' . $e->getMessage());
+        // 5. BERHASIL
+        // Hapus session cart jika bukan API
+        if (!($request->wantsJson() || $request->is('api/*'))) {
+            session()->forget('cart');
         }
+
+        // --- RESPONSE API ---
+        if ($request->wantsJson() || $request->is('api/*')) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Transaksi berhasil dibuat',
+                'data' => [
+                    'id_transaksi' => $idTransaksi,
+                    'total_harga' => $totalHarga,
+                    'invoice' => 'INV-' . time()
+                ]
+            ], 201);
+        }
+
+        // --- RESPONSE WEB ---
+        return redirect()->route('transaksi.show', $idTransaksi)->with('success', 'Pesanan berhasil dibuat!');
     }
 
     public function show(Request $request, $id)
@@ -124,10 +113,10 @@ class TransaksiController extends Controller
             abort(404, $pesan);
         }
 
-        $items = DB::table('detail_transaksi')
-            ->join('kelas', 'detail_transaksi.id_kelas', '=', 'kelas.id_kelas')
-            ->select('detail_transaksi.*', 'kelas.nama_kelas', 'kelas.thumbnail')
-            ->where('detail_transaksi.id_transaksi', $id)
+        $items = DB::table('transaksi_detail')
+            ->join('kelas', 'transaksi_detail.id_kelas', '=', 'kelas.id_kelas')
+            ->select('transaksi_detail.*', 'kelas.nama_kelas', 'kelas.thumbnail')
+            ->where('transaksi_detail.id_transaksi', $id)
             ->get();
 
         $metodePembayaran = DB::table('metode_pembayaran')->where('is_active', 1)->get();
@@ -193,8 +182,9 @@ class TransaksiController extends Controller
                 ]);
             
             return redirect()->back()->with('success', 'Pembayaran berhasil diupload');
-        } catch (\Exception $e) {
+            } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal upload pembayaran: ' . $e->getMessage());
         }
     }
 }
+    
